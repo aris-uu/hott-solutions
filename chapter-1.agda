@@ -77,6 +77,29 @@ transport refl px = px
 ×-ind : {A B : Set} → (C : A × B → Set) → ((a : A) → (b : B) → C (a , b)) → (x : A × B) → C x
 ×-ind C g x = transport {_} {C} (×-uniq x) (g (pr₁ x) (pr₂ x))
 
+-- exercise 1.4
+
+data ℕ : Set where
+  zero : ℕ
+  succ : ℕ → ℕ
+
+iter : {C : Set} → C → (C → C) → ℕ → C
+iter c0 cs zero = c0
+iter c0 cs (succ x) = cs (iter c0 cs x)
+
+cs' : {C : Set} → (ℕ → C → C) → C × ℕ → C × ℕ
+cs' cs (c' , x') = cs x' c' , succ x'
+
+ℕ-rec : {C : Set} → C → (ℕ → C → C) → ℕ → C
+ℕ-rec {C} c0 cs x = pr₁ (iter {C × ℕ} (c0 , zero) (cs' cs) x)
+
+ℕ-rec-α : {C : Set} → (c0 : C) → (cs : ℕ → C → C) → ℕ-rec c0 cs zero ≡ c0
+ℕ-rec-α c0 cs = refl
+
+ℕ-rec-β : {C : Set} → (c0 : C) → (cs : ℕ → C → C) → (n : ℕ) → ℕ-rec c0 cs (succ n) ≡ cs n (ℕ-rec c0 cs n)
+ℕ-rec-β c0 cs zero = refl
+ℕ-rec-β c0 cs (succ n) = {!   !}
+
 -- exercise 1.11
 
 data 𝟘 : Set where
@@ -114,3 +137,4 @@ data _⊕_ (A B : Set) : Set where
 
 ex1-13 : {P : Set} → ¬¬ (P ⊕ ¬ P)
 ex1-13 x = x (inr (λ p → x (inl p)))
+
