@@ -100,3 +100,8 @@ data _⊕_ (A B : Set) : Set where
 [iii] : {A B : Set} → (¬ A ⊕ ¬ B) → ¬ (A × B)
 [iii] (inl na) (a , b) = na a
 [iii] (inr nb) (a , b) = nb b
+
+-- exercise 1.13
+
+ex1-13 : {P : Set} → ¬¬ (P ⊕ ¬ P)
+ex1-13 x = x (inr (λ p → x (inl p)))
