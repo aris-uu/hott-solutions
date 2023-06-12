@@ -68,6 +68,15 @@ pr₂' (a , b) = b
 
 -- exercise 1.3
 
+×-uniq : {A B : Set} → (x : A × B) → (pr₁ x , pr₂ x) ≡ x
+×-uniq (a , b) = refl
+
+transport : {A : Set}{P : A → Set}{x y : A} → (p : x ≡ y) → P x → P y
+transport refl px = px
+
+×-ind : {A B : Set} → (C : A × B → Set) → ((a : A) → (b : B) → C (a , b)) → (x : A × B) → C x
+×-ind C g x = transport {_} {C} (×-uniq x) (g (pr₁ x) (pr₂ x))
+
 -- exercise 1.11
 
 data 𝟘 : Set where
