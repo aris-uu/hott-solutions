@@ -90,15 +90,41 @@ iter c0 cs (succ x) = cs (iter c0 cs x)
 cs' : {C : Set} → (ℕ → C → C) → C × ℕ → C × ℕ
 cs' cs (c' , x') = cs x' c' , succ x'
 
-ℕ-rec : {C : Set} → C → (ℕ → C → C) → ℕ → C
-ℕ-rec {C} c0 cs x = pr₁ (iter {C × ℕ} (c0 , zero) (cs' cs) x)
+ℕ-rec' : {C : Set} → C → (ℕ → C → C) → ℕ → C
+ℕ-rec' {C} c0 cs x = pr₁ (iter {C × ℕ} (c0 , zero) (cs' cs) x)
 
-ℕ-rec-α : {C : Set} → (c0 : C) → (cs : ℕ → C → C) → ℕ-rec c0 cs zero ≡ c0
+ℕ-rec : {C : Set} → C → (ℕ → C → C) → ℕ → C
+ℕ-rec c0 cs zero = c0
+ℕ-rec c0 cs (succ n) = cs n (ℕ-rec c0 cs n)
+
+ap : {A B : Set}{x y : A} → (f : A → B) → (x ≡ y) → (f x ≡ f y)
+ap f refl = refl
+
+ℕ-rec-α : {C : Set} → (c0 : C) → (cs : ℕ → C → C) → ℕ-rec' c0 cs zero ≡ c0
 ℕ-rec-α c0 cs = refl
 
-ℕ-rec-β : {C : Set} → (c0 : C) → (cs : ℕ → C → C) → (n : ℕ) → ℕ-rec c0 cs (succ n) ≡ cs n (ℕ-rec c0 cs n)
-ℕ-rec-β c0 cs zero = refl
-ℕ-rec-β c0 cs (succ n) = {!   !}
+-- iter-lemma' : {C : Set} → (c0 : C) → (cs : ℕ → C → C) →
+--   (n : ℕ) → pr₂ (iter (c0 , zero) (cs' cs) n) ≡ n
+-- iter-lemma' c0 cs zero = refl
+-- iter-lemma' c0 cs (succ n) = {! ap succ (iter-lemma' c0 cs n)  !}
+
+iter-lemma : {C : Set} → (c0 : C) → (cs : ℕ → C → C) →
+  (n : ℕ) → iter (c0 , zero) (cs' cs) n ≡ (ℕ-rec c0 cs n , n)
+iter-lemma c0 cs zero = refl
+iter-lemma c0 cs (succ n) = ap (λ x → cs' cs x) (iter-lemma c0 cs n)
+
+iter-lemma1 : {C : Set} → (c0 : C) → (cs : ℕ → C → C) →
+  (n : ℕ) → ℕ-rec' c0 cs n ≡ ℕ-rec c0 cs n
+iter-lemma1 c0 cs n = ap pr₁ (iter-lemma c0 cs n)
+
+inv : {A : Set}{x y : A} → x ≡ y → y ≡ x
+inv refl = refl
+
+_∙_ : {A : Set}{x y z : A} → x ≡ y → y ≡ z → x ≡ z
+refl ∙ refl = refl
+
+ℕ-rec-β : {C : Set} → (c0 : C) → (cs : ℕ → C → C) → (n : ℕ) → ℕ-rec' c0 cs (succ n) ≡ cs n (ℕ-rec' c0 cs n)
+ℕ-rec-β c0 cs n = iter-lemma1 c0 cs (succ n) ∙ inv (ap (cs n) (iter-lemma1 c0 cs n))
 
 -- exercise 1.11
 
@@ -137,4 +163,3 @@ data _⊕_ (A B : Set) : Set where
 
 ex1-13 : {P : Set} → ¬¬ (P ⊕ ¬ P)
 ex1-13 x = x (inr (λ p → x (inl p)))
-
