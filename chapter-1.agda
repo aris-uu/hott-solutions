@@ -5,6 +5,7 @@ module chapter-1 where
 open import identity
 open import product
 open import sigma
+open import nat
 
 -- exercise 1.1
 
@@ -20,15 +21,6 @@ g ∘ f = λ x → g (f x)
 
 -- product types
 
-×-rec : {A B : Set} → (C : Set) → (A → B → C) → (A × B) → C
-×-rec C f (a , b) = f a b
-
-pr₁ : {A B : Set} → A × B → A
-pr₁ (a , b) = a
-
-pr₂ : {A B : Set} → A × B → B
-pr₂ (a , b) = b
-
 ×-rec' : {A B : Set} → (C : Set) → (A → B → C) → (A × B) → C
 ×-rec' C g x = g (pr₁ x) (pr₂ x)
 
@@ -41,23 +33,11 @@ pr₂ (a , b) = b
 
 -- sigma types
 
-Σ-rec : {A : Set} → {B : A → Set} →
-        (C : Set) →
-        ((a : A) → B a → C) →
-        Σ A B → C
-Σ-rec C g (a , b) = g a b
-
-pr₁' : {A : Set} {B : A → Set} → Σ A B → A
-pr₁' (a , b) = a
-
-pr₂' : {A : Set} {B : A → Set} → (p : Σ A B) → B (pr₁' p)
-pr₂' (a , b) = b
-
 Σ-rec' : {A : Set} → {B : A → Set} →
         (C : Set) →
         ((a : A) → B a → C) →
         Σ A B → C
-Σ-rec' C g x = g (pr₁' x) (pr₂' x)
+Σ-rec' C g x = g (pr₁ x) (pr₂ x)
 
 Σ-rec-equiv : {A : Set} → {B : A → Set} →
               (C : Set) →
@@ -68,20 +48,10 @@ pr₂' (a , b) = b
 
 -- exercise 1.3
 
-×-uniq : {A B : Set} → (x : A × B) → (pr₁ x , pr₂ x) ≡ x
-×-uniq (a , b) = refl
-
-transport : {A : Set}{P : A → Set}{x y : A} → (p : x ≡ y) → P x → P y
-transport refl px = px
-
-×-ind : {A B : Set} → (C : A × B → Set) → ((a : A) → (b : B) → C (a , b)) → (x : A × B) → C x
-×-ind C g x = transport {_} {C} (×-uniq x) (g (pr₁ x) (pr₂ x))
+×-ind' : {A B : Set} → (C : A × B → Set) → ((a : A) → (b : B) → C (a , b)) → (x : A × B) → C x
+×-ind' C g x = transport {_} {C} (×-uniq x) (g (pr₁ x) (pr₂ x))
 
 -- exercise 1.4
-
-data ℕ : Set where
-  zero : ℕ
-  succ : ℕ → ℕ
 
 iter : {C : Set} → C → (C → C) → ℕ → C
 iter c0 cs zero = c0
@@ -93,20 +63,8 @@ cs' cs (c' , x') = cs x' c' , succ x'
 ℕ-rec' : {C : Set} → C → (ℕ → C → C) → ℕ → C
 ℕ-rec' {C} c0 cs x = pr₁ (iter {C × ℕ} (c0 , zero) (cs' cs) x)
 
-ℕ-rec : {C : Set} → C → (ℕ → C → C) → ℕ → C
-ℕ-rec c0 cs zero = c0
-ℕ-rec c0 cs (succ n) = cs n (ℕ-rec c0 cs n)
-
-ap : {A B : Set}{x y : A} → (f : A → B) → (x ≡ y) → (f x ≡ f y)
-ap f refl = refl
-
 ℕ-rec-α : {C : Set} → (c0 : C) → (cs : ℕ → C → C) → ℕ-rec' c0 cs zero ≡ c0
 ℕ-rec-α c0 cs = refl
-
--- iter-lemma' : {C : Set} → (c0 : C) → (cs : ℕ → C → C) →
---   (n : ℕ) → pr₂ (iter (c0 , zero) (cs' cs) n) ≡ n
--- iter-lemma' c0 cs zero = refl
--- iter-lemma' c0 cs (succ n) = {! ap succ (iter-lemma' c0 cs n)  !}
 
 iter-lemma : {C : Set} → (c0 : C) → (cs : ℕ → C → C) →
   (n : ℕ) → iter (c0 , zero) (cs' cs) n ≡ (ℕ-rec c0 cs n , n)
@@ -116,12 +74,6 @@ iter-lemma c0 cs (succ n) = ap (λ x → cs' cs x) (iter-lemma c0 cs n)
 iter-lemma1 : {C : Set} → (c0 : C) → (cs : ℕ → C → C) →
   (n : ℕ) → ℕ-rec' c0 cs n ≡ ℕ-rec c0 cs n
 iter-lemma1 c0 cs n = ap pr₁ (iter-lemma c0 cs n)
-
-inv : {A : Set}{x y : A} → x ≡ y → y ≡ x
-inv refl = refl
-
-_∙_ : {A : Set}{x y z : A} → x ≡ y → y ≡ z → x ≡ z
-refl ∙ refl = refl
 
 ℕ-rec-β : {C : Set} → (c0 : C) → (cs : ℕ → C → C) → (n : ℕ) → ℕ-rec' c0 cs (succ n) ≡ cs n (ℕ-rec' c0 cs n)
 ℕ-rec-β c0 cs n = iter-lemma1 c0 cs (succ n) ∙ inv (ap (cs n) (iter-lemma1 c0 cs n))
