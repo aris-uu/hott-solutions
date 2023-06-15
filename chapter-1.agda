@@ -7,6 +7,7 @@ open import product
 open import sigma
 open import nat
 open import coproduct
+open import bool
 
 -- exercise 1.1
 
@@ -81,7 +82,38 @@ iter-lemma1 c0 cs n = ap pr₁ (iter-lemma c0 cs n)
 
 -- exercise 1.5
 
+_⊕'_ : (A B : Set) → Set
+A ⊕' B = Σ Bool (bool-rec A B)
 
+inl' : {A B : Set} → A → A ⊕' B
+inl' a = false , a
+
+inr' : {A B : Set} → B → A ⊕' B
+inr' b = true , b
+
+⊕-ind' : {A B : Set} →
+          (C : A ⊕' B → Set) →
+          ((a : A) → C (inl' a)) →
+          ((b : B) → C (inr' b)) →
+          (x : A ⊕' B) → C x
+⊕-ind' C g0 g1 (false , x) = g0 x
+⊕-ind' C g0 g1 (true , x) = g1 x
+
+⊕-ind-α : {A B : Set} →
+          (C : A ⊕' B → Set) →
+          (g0 : (a : A) → C (inl' a)) →
+          (g1 : (b : B) → C (inr' b)) →
+          (a : A) →
+          ⊕-ind' C g0 g1 (inl' a) ≡ g0 a
+⊕-ind-α C g0 g1 a = refl
+
+⊕-ind-β : {A B : Set} →
+          (C : A ⊕' B → Set) →
+          (g0 : (a : A) → C (inl' a)) →
+          (g1 : (b : B) → C (inr' b)) →
+          (b : B) →
+          ⊕-ind' C g0 g1 (inr' b) ≡ g1 b
+⊕-ind-β C g0 g1 b = refl
 
 -- exercise 1.11
 
