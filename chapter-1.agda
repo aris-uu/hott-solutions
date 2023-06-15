@@ -6,6 +6,7 @@ open import identity
 open import product
 open import sigma
 open import nat
+open import coproduct
 
 -- exercise 1.1
 
@@ -78,6 +79,10 @@ iter-lemma1 c0 cs n = ap pr₁ (iter-lemma c0 cs n)
 ℕ-rec-β : {C : Set} → (c0 : C) → (cs : ℕ → C → C) → (n : ℕ) → ℕ-rec' c0 cs (succ n) ≡ cs n (ℕ-rec' c0 cs n)
 ℕ-rec-β c0 cs n = iter-lemma1 c0 cs (succ n) ∙ inv (ap (cs n) (iter-lemma1 c0 cs n))
 
+-- exercise 1.5
+
+
+
 -- exercise 1.11
 
 data 𝟘 : Set where
@@ -96,10 +101,6 @@ ex1-11 : {A : Set} → ¬¬¬ A → ¬ A
 ex1-11 = λ x x₁ → x λ x₂ → x₂ x₁
 
 -- exercise 1.12
-
-data _⊕_ (A B : Set) : Set where
-  inl : A → A ⊕ B
-  inr : B → A ⊕ B
 
 [i] : {A B : Set} → A → B → A
 [i] a b = a
